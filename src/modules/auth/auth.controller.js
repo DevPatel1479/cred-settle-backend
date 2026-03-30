@@ -9,7 +9,7 @@ export const signup = async (req, res, next) => {
       name,
       email,
       phone,
-      city,
+      City,
       employment,
       query,
     } = req.body;
@@ -17,7 +17,7 @@ export const signup = async (req, res, next) => {
     // =========================
     // VALIDATION
     // =========================
-    if (!name || !email || !phone || !city || !employment) {
+    if (!name || !email || !phone || !City || !employment) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -43,7 +43,7 @@ export const signup = async (req, res, next) => {
   email,
   phone,
   countryCode: "+91",
-  city,
+  city : City,
 
   employment: {
     employmentStatus: employment["Employment Status"] ?? null,
