@@ -39,28 +39,29 @@ export const signup = async (req, res, next) => {
     // DATA STRUCTURE
     // =========================
     const data = {
-      name,
-      email,
-      phone,
-      countryCode: "+91",
-      city,
+  name,
+  email,
+  phone,
+  countryCode: "+91",
+  city,
 
-      employment: {
-        employmentStatus: employment["Employment Status"],
-        monthlyIncome: employment["Monthly Income"],
-        harassment: employment["Facing Harassment"],
-        creditCardDues: employment["Total Credit Card Dues"],
-        personalLoanDues: employment["Total Personal Loan Dues"],
-        startPayment: employment["Start Process Payment"],
-      },
+  employment: {
+    employmentStatus: employment["Employment Status"] ?? null,
+    monthlyIncome: employment["Monthly income"] ?? null,
+    harassment: employment["Facing Harassment?"] ?? null,
+    creditCardDues: employment["Total Credit Card Dues?"] ?? null,
+    personalLoanDues: employment["Total Personal Loan Dues?"] ?? null,
+    startPayment:
+      employment["Can you pay ₹2,000 to ₹5,000 to start the process?"] ?? null,
+  },
 
-      ...(query && { query }),
+  ...(query && { query }),
 
-      isVerified: false, // 🔥 future ready
+  isVerified: false,
 
-      createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
-    };
+  createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+  updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+};
 
     await userRef.set(data);
 
