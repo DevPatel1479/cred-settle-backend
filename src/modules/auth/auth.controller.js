@@ -12,12 +12,13 @@ export const signup = async (req, res, next) => {
       City,
       employment,
       query,
+      provider
     } = req.body;
 
     // =========================
     // VALIDATION
     // =========================
-    if (!name || !email || !phone || !City || !employment) {
+    if (!name || !email || !phone || !City || !employment || !provider) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -39,29 +40,29 @@ export const signup = async (req, res, next) => {
     // DATA STRUCTURE
     // =========================
     const data = {
-  name,
-  email,
-  phone,
-  countryCode: "+91",
-  city : City,
+      name,
+      email,
+      phone,
+      countryCode: "+91",
+      city : City,
+      provider,
 
-  employment: {
-    employmentStatus: employment["Employment Status"] ?? null,
-    monthlyIncome: employment["Monthly income"] ?? null,
-    harassment: employment["Facing Harassment?"] ?? null,
-    creditCardDues: employment["Total Credit Card Dues?"] ?? null,
-    personalLoanDues: employment["Total Personal Loan Dues?"] ?? null,
-    startPayment:
-      employment["Can you pay ₹2,000 to ₹5,000 to start the process?"] ?? null,
-  },
+      employment: {
+        employmentStatus: employment["Employment Status"] ?? null,
+        monthlyIncome: employment["Monthly income"] ?? null,
+        harassment: employment["Facing Harassment?"] ?? null,
+        creditCardDues: employment["Total Credit Card Dues?"] ?? null,
+        personalLoanDues: employment["Total Personal Loan Dues?"] ?? null,
+        startPayment: employment["Can you pay ₹2,000 to ₹5,000 to start the process?"] ?? null,
+      },
 
-  ...(query && { query }),
+      ...(query && { query }),
 
-  isVerified: false,
-
-  createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
-  updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
-};
+      isVerified: false,
+      
+      createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+    };
 
     await userRef.set(data);
 
