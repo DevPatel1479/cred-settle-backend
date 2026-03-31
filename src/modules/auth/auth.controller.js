@@ -85,3 +85,73 @@ export const signup = async (req, res, next) => {
     next(error);
   }
 };
+
+
+
+
+
+
+export const login = async (req, res, next) => {
+  try {
+    const { email, firebase_uid, idToken } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
+    if (!email || !firebase_uid || !idToken) {
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
+    }
+
+    // =========================
+    // VERIFY FIREBASE TOKEN 🔐
+    // =========================
+    const decodedToken = await firebaseAdmin
+      .auth()
+      .verifyIdToken(idToken);
+
+    if (decodedToken.uid !== firebase_uid) {
+      return res.status(401).json({
+        message: "Invalid Firebase token",
+      });
+    }
+
+    // =========================
+    // FIND USER IN FIRESTORE
+    // =========================
+    const usersRef = db.collection("users");
+
+    const snapshot = await usersRef
+      .where("firebase_uid", "==", firebase_uid)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({
+        message: "User not found. Please signup first.",
+      });
+    }
+
+    const userDoc = snapshot.docs[0];
+    const userData = userDoc.data();
+
+    // =========================
+    // JWT TOKEN
+    // =========================
+    const token = jwt.sign(
+      { userId: userDoc.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      userId: userDoc.id,
+      user: userData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
