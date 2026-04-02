@@ -14,4 +14,6 @@ const crmApp = admin.initializeApp(
 );
 
 // ✅ separate firestore instance
-export const crmFirestore = crmApp.firestore();
+const crmFirestore = crmApp.firestore();
+
+export {admin, crmFirestore};
