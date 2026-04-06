@@ -1,14 +1,14 @@
 import express from "express";
 import {
-    sendTopicNotification, 
-    getLastOpenedNotificationTime, 
-    updateLastOpenedNotificationTime, 
-    adminGetLastOpenedNotificationTime, 
+    sendTopicNotification,
+    getLastOpenedNotificationTime,
+    updateLastOpenedNotificationTime,
+    adminGetLastOpenedNotificationTime,
     adminUpdateLastOpenedNotificationTime,
     getNotificationsByRole,
     getUserNotificationHistory
-} 
-from "./notification.controller.js";
+}
+    from "./notification.controller.js";
 
 const router = express.Router();
 

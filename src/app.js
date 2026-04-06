@@ -8,6 +8,7 @@ import fileDisputeRoutes from "./modules/filedispute/file.dispute.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import clientRoutes from "./modules/client/client.routes.js";
 import notificationRoutes from "./modules/notifications/notification.route.js";
+import fcmRoutes from "./modules/fcm/fcm.routes.js";
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use("/api", fileDisputeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", clientRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/ftoken", fcmRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "credsettle-backend" });
