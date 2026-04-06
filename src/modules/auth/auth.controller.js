@@ -61,6 +61,7 @@ export const signup = async (req, res, next) => {
       name,
       email,
       phone,
+      role: "user",
       countryCode: "+91",
       city: City,
       provider,
@@ -81,6 +82,7 @@ export const signup = async (req, res, next) => {
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
       refreshTokens: [refreshToken],
+
     };
 
     await userRef.set(data);
