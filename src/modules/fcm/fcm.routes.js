@@ -1,5 +1,5 @@
 import express from "express";
-import { storeFcmToken, updateFcmToken } from "./fcm.controller";
+import { storeFcmToken, updateFcmToken } from "./fcm.controller.js";
 
 const router = express.Router();
 

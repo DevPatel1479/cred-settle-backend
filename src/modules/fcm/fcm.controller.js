@@ -5,9 +5,7 @@ const db = firebaseAdmin.firestore();
 
 const collectionName = "users";
 
-function extractPhone(user_id) {
-    return user_id.split("_").pop();
-}
+
 
 
 export const storeFcmToken = async (req, res) => {
