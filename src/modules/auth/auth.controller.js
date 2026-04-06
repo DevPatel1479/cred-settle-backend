@@ -62,6 +62,7 @@ export const signup = async (req, res, next) => {
       email,
       phone,
       role: "user",
+      topic: "all_users",
       countryCode: "+91",
       city: City,
       provider,
