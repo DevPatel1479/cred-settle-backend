@@ -9,6 +9,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import clientRoutes from "./modules/client/client.routes.js";
 import notificationRoutes from "./modules/notifications/notification.route.js";
 import fcmRoutes from "./modules/fcm/fcm.routes.js";
+import scheduleNotificationRoutes from "./modules/scheduledNotifications/schedule.notification.routes.js";
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", clientRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/ftoken", fcmRoutes);
-
+app.use("/api", scheduleNotificationRoutes);
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "credsettle-backend" });
 });
