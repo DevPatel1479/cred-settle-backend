@@ -18,7 +18,7 @@ export const sendTopicNotification = async (req, res) => {
     const topics = Array.isArray(topic) ? topic : [topic];
     const parts = user_id.split("_");
     const phone = parts[1];
-
+    
     // Verify user exists (optional)
     const userDoc = await db.collection("users").doc(`91${phone}`).get();
     console.log("User doc:", userDoc.exists, `91${phone}`);
@@ -139,10 +139,10 @@ export const sendTopicNotification = async (req, res) => {
 
       const rolesToStore = [];
       if (topics.includes("all_clients")) rolesToStore.push("client");
-    //   if (topics.includes("all_advocates")) rolesToStore.push("advocate");
+      //   if (topics.includes("all_advocates")) rolesToStore.push("advocate");
       if (topics.includes("all_users")) rolesToStore.push("user");
-    //   if (topics.includes("all_legal_experts"))
-    //     rolesToStore.push("legal_expert");
+      //   if (topics.includes("all_legal_experts"))
+      //     rolesToStore.push("legal_expert");
 
       const storePromises = rolesToStore.map((role) =>
         db
@@ -210,7 +210,7 @@ export const getLastOpenedNotificationTime = async (req, res) => {
   }
 };
 
-export const  updateLastOpenedNotificationTime = async (req, res) => {
+export const updateLastOpenedNotificationTime = async (req, res) => {
   try {
     const { phone } = req.body;
 

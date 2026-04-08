@@ -1,4 +1,11 @@
 import { crmFirestore } from "../../config/firebase.crm.js";
+import { firebaseAdmin } from "../../config/firebase.js";
+
+const admin = firebaseAdmin;
+const db = admin.firestore();
+
+
+
 
 export const getClientData = async (req, res, next) => {
   try {
@@ -54,7 +61,7 @@ export const getTotalDues = async (req, res, next) => {
 
     // 🔥 Fetch only required client
     const snapshot = await crmFirestore
-      .collection("clients")
+      .collection("users")
       .where("phone", "==", phone)
       .limit(1)
       .get();
@@ -88,5 +95,68 @@ export const getTotalDues = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+
+
+export const updateClientData = async (req, res, next) => {
+  try {
+    const { phone, updateData } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
+    if (!phone) {
+      return res.status(400).json({
+        message: "Phone is required",
+      });
+    }
+
+    if (!updateData || typeof updateData !== "object") {
+      return res.status(400).json({
+        message: "updateData must be a valid object",
+      });
+    }
+
+    // =========================
+    // FIND CLIENT (FAST QUERY)
+    // =========================
+    const docRef = db.collection("users").doc(`91${phone}`);
+
+
+    if (docRef === null) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+
+
+    // =========================
+    // PREPARE UPDATE OBJECT
+    // =========================
+    const finalUpdate = {
+      ...updateData,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // =========================
+    // UPDATE DATA (PARTIAL)
+    // =========================
+    await docRef.update(finalUpdate);
+
+    return res.status(200).json({
+      message: "Client updated successfully",
+      updatedFields: Object.keys(updateData),
+    });
+
+  } catch (error) {
+    console.error("Update Client Error:", error);
+
+    return res.status(500).json({
+      message: "Failed to update client",
+      error: error.message,
+    });
   }
 };
