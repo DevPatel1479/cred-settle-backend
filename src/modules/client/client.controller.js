@@ -61,7 +61,7 @@ export const getTotalDues = async (req, res, next) => {
 
     // 🔥 Fetch only required client
     const snapshot = await crmFirestore
-      .collection("users")
+      .collection("clients")
       .where("phone", "==", phone)
       .limit(1)
       .get();
