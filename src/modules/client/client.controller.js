@@ -123,9 +123,9 @@ export const updateClientData = async (req, res, next) => {
     // FIND CLIENT (FAST QUERY)
     // =========================
     const docRef = db.collection("users").doc(`91${phone}`);
+    const docSnap = await docRef.get();
 
-
-    if (docRef === null) {
+    if (!docSnap.exists) {
       return res.status(404).json({
         message: "Client not found",
       });
