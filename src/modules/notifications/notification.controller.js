@@ -18,7 +18,7 @@ export const sendTopicNotification = async (req, res) => {
     const topics = Array.isArray(topic) ? topic : [topic];
     const parts = user_id.split("_");
     const phone = parts[1];
-    
+
     // Verify user exists (optional)
     const userDoc = await db.collection("users").doc(`91${phone}`).get();
     console.log("User doc:", userDoc.exists, `91${phone}`);
@@ -330,88 +330,91 @@ export const adminUpdateLastOpenedNotificationTime = async (req, res) => {
 export const getNotificationsByRole = async (req, res) => {
   try {
     const role = (req.params.role || "").toLowerCase();
+    const phone = req.query.phone;
+
     if (!role) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Role path param is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Role is required",
+      });
+    }
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone is required",
+      });
     }
 
     if (role === "admin") {
       return res.status(403).json({
         success: false,
-        message: "Access to admin notifications denied",
+        message: "Admin notifications blocked",
       });
     }
 
-    // 🟢 Read page & limit params
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const lastDocId = req.query.lastDocId || null;
 
-    if (page < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Page number must be greater than 0",
-      });
-    }
-
-    // 🟢 Calculate offset
-    const offset = (page - 1) * limit;
-
-    // 🟢 Fetch all documents ordered by timestamp
-    const messagesRef = db
+    let queryRef = db
       .collection("notifications")
       .doc(role)
       .collection("messages")
-      .orderBy("timestamp", "desc");
+      .where("phone", "in", ["GLOBAL", phone])
+      .orderBy("timestamp", "desc")
+      .limit(limit);
 
-    const snapshot = await messagesRef.get();
+    // Pagination cursor
+    if (lastDocId) {
+      const lastDoc = await db
+        .collection("notifications")
+        .doc(role)
+        .collection("messages")
+        .doc(lastDocId)
+        .get();
+
+      if (lastDoc.exists) {
+        queryRef = queryRef.startAfter(lastDoc);
+      }
+    }
+
+    const snapshot = await queryRef.get();
 
     if (snapshot.empty) {
       return res.status(200).json({
         success: true,
         data: [],
-        message: "No notifications found",
-        page,
+        lastDocId: null,
         hasMore: false,
       });
     }
 
-    // 🟢 Slice manually based on offset & limit
-    const allDocs = snapshot.docs;
-    const paginatedDocs = allDocs.slice(offset, offset + limit);
-
-    const results = paginatedDocs.map((doc) => {
+    const results = snapshot.docs.map((doc) => {
       const d = doc.data();
       return {
         id: doc.id,
-        n_title: d.n_title,
-        n_body: d.n_body,
+        title: d.n_title,
+        body: d.n_body,
         timestamp: d.timestamp,
         sent_by: d.sent_by || null,
         topics: d.topics || [],
+        phone: d.phone || "GLOBAL",
       };
     });
 
-    const totalDocs = allDocs.length;
-    const totalPages = Math.ceil(totalDocs / limit);
-    const hasMore = page < totalPages;
+    const newLastDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
 
     return res.status(200).json({
       success: true,
       data: results,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalDocs,
-        hasMore,
-        nextPage: hasMore ? page + 1 : null,
-      },
+      lastDocId: newLastDocId,
+      hasMore: snapshot.docs.length === limit,
     });
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    console.error("Notification fetch error:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch notifications",
+      message: "Fetch failed",
       error: error.message,
     });
   }
