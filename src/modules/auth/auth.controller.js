@@ -30,7 +30,7 @@ export const signup = async (req, res, next) => {
       employment,
       query,
       provider,
-      firebase_uid
+      // firebase_uid
     } = req.body;
 
     // =========================
@@ -66,7 +66,7 @@ export const signup = async (req, res, next) => {
       countryCode: "+91",
       city: City,
       provider,
-      firebase_uid,
+      firebase_uid: null,
       employment: {
         employmentStatus: employment["Employment Status"] ?? null,
         monthlyIncome: employment["Monthly income"] ?? null,
@@ -274,4 +274,36 @@ export const logout = async (req, res) => {
   });
 
   return res.json({ message: "Logged out successfully" });
+};
+
+
+
+export const updateFirebaseUid = async (req, res) => {
+  try {
+    const { email, firebase_uid } = req.body;
+
+    const usersRef = db.collection("users");
+
+    const snapshot = await usersRef
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userDoc = snapshot.docs[0];
+
+    await userDoc.ref.update({
+      firebase_uid,
+      updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({
+      message: "Firebase UID linked successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
