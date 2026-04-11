@@ -280,30 +280,38 @@ export const logout = async (req, res) => {
 
 export const updateFirebaseUid = async (req, res) => {
   try {
-    const { email, firebase_uid } = req.body;
+    const { phone, firebase_uid } = req.body;
 
-    const usersRef = db.collection("users");
-
-    const snapshot = await usersRef
-      .where("email", "==", email)
-      .limit(1)
-      .get();
-
-    if (snapshot.empty) {
-      return res.status(404).json({ message: "User not found" });
+    if (!phone || !firebase_uid) {
+      return res.status(400).json({
+        message: "phone and firebase_uid are required",
+      });
     }
 
-    const userDoc = snapshot.docs[0];
+    const phoneWithCode = `91${phone}`;
+    const userRef = db.collection("users").doc(phoneWithCode);
 
-    await userDoc.ref.update({
+    const user = await userRef.get();
+
+    if (!user.exists) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // update firebase uid
+    await userRef.update({
       firebase_uid,
       updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     });
 
     return res.status(200).json({
-      message: "Firebase UID linked successfully",
+      message: "Firebase UID updated successfully",
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
