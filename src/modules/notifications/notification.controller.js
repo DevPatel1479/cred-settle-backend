@@ -50,7 +50,7 @@ export const sendTopicNotification = async (req, res) => {
         headers: {
           "apns-priority": "10",
           "apns-push-type": "alert",
-          "apns-topic": "com.ama.amaLegalSolutions", // update if needed
+          "apns-topic": "com.loancredsettle.app", // update if needed
         },
         payload: {
           aps: {
