@@ -36,7 +36,7 @@ export const signup = async (req, res, next) => {
     // =========================
     // VALIDATION
     // =========================
-    if (!name || !email || !phone || !City || !employment || !provider) {
+    if (!name || !phone || !City || !employment || !provider) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -123,7 +123,7 @@ export const login = async (req, res, next) => {
     // =========================
     // VALIDATION
     // =========================
-    if (!email || !firebase_uid || !idToken) {
+    if (!firebase_uid || !idToken) {
       return res.status(400).json({
         message: "Missing required fields",
       });
