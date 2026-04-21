@@ -30,7 +30,7 @@ export const signup = async (req, res, next) => {
       employment,
       query,
       provider,
-      // firebase_uid
+      firebase_uid
     } = req.body;
 
     // =========================
@@ -66,7 +66,7 @@ export const signup = async (req, res, next) => {
       countryCode: "+91",
       city: City,
       provider,
-      firebase_uid: null,
+      firebase_uid,
       employment: {
         employmentStatus: employment["Employment Status"] ?? null,
         monthlyIncome: employment["Monthly income"] ?? null,
