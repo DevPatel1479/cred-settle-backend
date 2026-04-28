@@ -102,14 +102,11 @@ export const getTotalDues = async (req, res, next) => {
 
 export const updateClientData = async (req, res, next) => {
   try {
-    const { phone, updateData } = req.body;
+    const { userId, updateData } = req.body;
 
-    // =========================
-    // VALIDATION
-    // =========================
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
-        message: "Phone is required",
+        message: "userId is required",
       });
     }
 
@@ -119,66 +116,7 @@ export const updateClientData = async (req, res, next) => {
       });
     }
 
-    // =========================
-    // FIND CLIENT (FAST QUERY)
-    // =========================
-    const docRef = db.collection("users").doc(`91${phone}`);
-    const docSnap = await docRef.get();
-
-    if (!docSnap.exists) {
-      return res.status(404).json({
-        message: "Client not found",
-      });
-    }
-
-
-
-    // =========================
-    // PREPARE UPDATE OBJECT
-    // =========================
-    const finalUpdate = {
-      ...updateData,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    };
-
-    // =========================
-    // UPDATE DATA (PARTIAL)
-    // =========================
-    await docRef.update(finalUpdate);
-
-    return res.status(200).json({
-      message: "Client updated successfully",
-      updatedFields: Object.keys(updateData),
-    });
-
-  } catch (error) {
-    console.error("Update Client Error:", error);
-
-    return res.status(500).json({
-      message: "Failed to update client",
-      error: error.message,
-    });
-  }
-};
-
-
-export const getUserData = async (req, res, next) => {
-  try {
-    const { phone } = req.body;
-
-    // =========================
-    // VALIDATION
-    // =========================
-    if (!phone) {
-      return res.status(400).json({
-        message: "Phone is required",
-      });
-    }
-
-    // =========================
-    // DIRECT DOC FETCH (FASTEST)
-    // =========================
-    const docRef = db.collection("users").doc(`91${phone}`);
+    const docRef = db.collection("users").doc(userId);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
@@ -187,9 +125,43 @@ export const getUserData = async (req, res, next) => {
       });
     }
 
-    // =========================
-    // RESPONSE
-    // =========================
+    await docRef.update({
+      ...updateData,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      updatedFields: Object.keys(updateData),
+    });
+  } catch (error) {
+    console.error("Update User Error:", error);
+
+    return res.status(500).json({
+      message: "Failed to update user",
+      error: error.message,
+    });
+  }
+};
+
+export const getUserData = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const docSnap = await db.collection("users").doc(userId).get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
     return res.status(200).json({
       message: "User data fetched successfully",
       data: {
@@ -197,7 +169,6 @@ export const getUserData = async (req, res, next) => {
         ...docSnap.data(),
       },
     });
-
   } catch (error) {
     console.error("Get User Error:", error);
 
