@@ -286,6 +286,62 @@ export const logout = async (req, res) => {
 
 
 
+export const updatePhoneNumber = async (req, res) => {
+  try {
+    const { userId, phone } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
+    if (!userId || !phone) {
+      return res.status(400).json({
+        message: "userId and phone are required",
+      });
+    }
+
+    // Indian phone number validation
+    const cleanPhone = phone.trim();
+
+    if (!/^\d{10}$/.test(cleanPhone)) {
+      return res.status(400).json({
+        message: "Please enter a valid 10-digit phone number",
+      });
+    }
+
+    // =========================
+    // FIND USER
+    // =========================
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // =========================
+    // UPDATE PHONE NUMBER
+    // =========================
+    await userRef.update({
+      phone: cleanPhone,
+      countryCode: "+91",
+      updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({
+      message: "Phone number updated successfully",
+      phone: cleanPhone,
+      countryCode: "+91",
+    });
+  } catch (error) {
+    console.error("Update Phone Error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 export const updateFirebaseUid = async (req, res) => {
   try {
     const { userId, firebase_uid } = req.body;
