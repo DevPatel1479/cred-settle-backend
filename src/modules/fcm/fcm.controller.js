@@ -10,16 +10,16 @@ const collectionName = "users";
 
 export const storeFcmToken = async (req, res) => {
     try {
-        const { phone, fcm_token } = req.body;
+        const { userId, fcm_token } = req.body;
 
-        if (!phone || !fcm_token) {
+        if (!userId || !fcm_token) {
             return res
                 .status(400)
-                .json({ error: "phone and fcm_token are required" });
+                .json({ error: "userId and fcm_token are required" });
         }
-        const phone_val = `91${phone}`;
+        // const phone_val = `91${phone}`;
 
-        const userRef = db.collection(collectionName).doc(phone_val);
+        const userRef = db.collection(collectionName).doc(userId);
         const userDoc = await userRef.get();
 
         if (!userDoc.exists) {
@@ -38,17 +38,17 @@ export const storeFcmToken = async (req, res) => {
 // Update FCM token
 export const updateFcmToken = async (req, res) => {
     try {
-        const { phone_val, fcm_token } = req.body;
+        const { userId, fcm_token } = req.body;
 
-        if (!phone_val || !fcm_token) {
+        if (!userId || !fcm_token) {
             return res
                 .status(400)
-                .json({ error: "phone_val and fcm_token are required" });
+                .json({ error: "userId and fcm_token are required" });
         }
 
-        const phone = `91${phone_val}`;
+        // const phone = `91${phone_val}`;
 
-        const userRef = db.collection(collectionName).doc(phone);
+        const userRef = db.collection(collectionName).doc(userId);
         const userDoc = await userRef.get();
 
         if (!userDoc.exists) {
