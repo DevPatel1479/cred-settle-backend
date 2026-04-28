@@ -361,7 +361,7 @@ export const getNotificationsByRole = async (req, res) => {
       .collection("notifications")
       .doc(role)
       .collection("messages")
-      .where("phone", "in", ["GLOBAL", phone])
+      // .where("phone", "in", ["GLOBAL", phone])
       .orderBy("timestamp", "desc")
       .limit(limit);
 
