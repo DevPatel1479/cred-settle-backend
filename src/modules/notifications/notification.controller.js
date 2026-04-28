@@ -425,13 +425,13 @@ export const getNotificationsByRole = async (req, res) => {
 
 export const getUserNotificationHistory = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { userId } = req.params;
     const { pageSize = 10, lastTimestamp } = req.query;
 
-    if (!user_id) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "user_id is required",
+        message: "User ID is required",
       });
     }
 
@@ -448,7 +448,7 @@ export const getUserNotificationHistory = async (req, res) => {
 
     const userMessagesRef = db
       .collection("notification_history")
-      .doc(user_id)
+      .doc(userId)
       .collection("messages");
 
     let queryRef = userMessagesRef
