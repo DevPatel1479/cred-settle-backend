@@ -1,5 +1,6 @@
 import { firebaseAdmin } from "../../config/firebase.js";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 const db = firebaseAdmin.firestore();
 
@@ -36,15 +37,17 @@ export const signup = async (req, res, next) => {
     // =========================
     // VALIDATION
     // =========================
-    if (!name || !phone || !City || !employment || !provider) {
+    if (!name || !City || !employment || !provider) {
       return res.status(400).json({
         message: "Missing required fields",
       });
     }
+    const userId = uuidv4();
 
-    const phoneWithCode = `91${phone}`;
+    // const phoneWithCode = `91${phone}`;
 
-    const userRef = db.collection("users").doc(phoneWithCode);
+    // const userRef = db.collection("users").doc(phoneWithCode);
+    const userRef = db.collection("users").doc(userId);
 
     const existingUser = await userRef.get();
 
@@ -53,7 +56,9 @@ export const signup = async (req, res, next) => {
         message: "User already exists",
       });
     }
-    const { accessToken, refreshToken } = generateTokens(phoneWithCode);
+    // const { accessToken, refreshToken } = generateTokens(phoneWithCode);
+    const { accessToken, refreshToken } =
+      generateTokens(userId);
     // =========================
     // DATA STRUCTURE
     // =========================
@@ -61,6 +66,7 @@ export const signup = async (req, res, next) => {
       name,
       email,
       phone,
+      userId,
       role: "user",
       topic: "all_users",
       countryCode: "+91",
@@ -104,7 +110,7 @@ export const signup = async (req, res, next) => {
       message: "User registered successfully",
       accessToken,
       refreshToken,
-      userId: phoneWithCode,
+      userId,
     });
   } catch (error) {
     next(error);
@@ -160,7 +166,8 @@ export const login = async (req, res, next) => {
 
     const userDoc = snapshot.docs[0];
     const userData = userDoc.data();
-    const { accessToken, refreshToken } = generateTokens(userDoc.id);
+    const userId = userData.userId;
+    const { accessToken, refreshToken } = generateTokens(userId);
     // store refresh token in DB
     // await userDoc.ref.update({ refreshToken });
     await userDoc.ref.update({
@@ -174,13 +181,14 @@ export const login = async (req, res, next) => {
     //   process.env.JWT_SECRET,
     //   { expiresIn: "7d" }
     // );
+    const freshUser = (await userDoc.ref.get()).data();
 
     return res.status(200).json({
       message: "Login successful",
       accessToken,
       refreshToken,
-      userId: userDoc.id,
-      user: userData,
+      userId,
+      user: freshUser,
     });
   } catch (error) {
     next(error);
@@ -280,16 +288,19 @@ export const logout = async (req, res) => {
 
 export const updateFirebaseUid = async (req, res) => {
   try {
-    const { phone, firebase_uid } = req.body;
+    const { userId, firebase_uid } = req.body;
 
-    if (!phone || !firebase_uid) {
+    if (!userId || !firebase_uid) {
       return res.status(400).json({
-        message: "phone and firebase_uid are required",
+        message: "userId and firebase_uid are required",
       });
     }
 
-    const phoneWithCode = `91${phone}`;
-    const userRef = db.collection("users").doc(phoneWithCode);
+    // const phoneWithCode = `91${phone}`;
+    // const userRef = db.collection("users").doc(phoneWithCode);
+
+    const userRef = db.collection("users").doc(userId);
+
 
     const user = await userRef.get();
 
