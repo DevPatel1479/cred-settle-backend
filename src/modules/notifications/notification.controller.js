@@ -16,12 +16,13 @@ export const sendTopicNotification = async (req, res) => {
     }
 
     const topics = Array.isArray(topic) ? topic : [topic];
-    const parts = user_id.split("_");
-    const phone = parts[1];
-
+    // const parts = user_id.split("_");
+    // const phone = parts[1];
+    const userDoc = await db.collection("users").doc(user_id).get();
     // Verify user exists (optional)
-    const userDoc = await db.collection("users").doc(`91${phone}`).get();
-    console.log("User doc:", userDoc.exists, `91${phone}`);
+    // const userDoc = await db.collection("users").doc(`91${phone}`).get();
+    // console.log("User doc:", userDoc.exists, `91${phone}`);
+
     if (!userDoc.exists) {
       return res
         .status(404)
@@ -106,7 +107,7 @@ export const sendTopicNotification = async (req, res) => {
 
       await db
         .collection("notification_history")
-        .doc(`91${phone}`)
+        .doc(user_id)
         .collection("messages")
         .add({
           ...baseMessageDoc,
@@ -154,7 +155,7 @@ export const sendTopicNotification = async (req, res) => {
       await Promise.all(storePromises);
       await db
         .collection("notification_history")
-        .doc(`91${phone}`)
+        .doc(user_id)
         .collection("messages")
         .add(baseMessageDoc);
       return res.status(200).json({
@@ -175,17 +176,17 @@ export const sendTopicNotification = async (req, res) => {
 
 export const getLastOpenedNotificationTime = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { userId } = req.body;
 
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Phone is required",
+        message: "User ID is required",
       });
     }
 
-    const documentId = `91${phone}`;
-    const userRef = db.collection("users").doc(documentId);
+    // const documentId = `91${phone}`;
+    const userRef = db.collection("users").doc(userId);
     const snap = await userRef.get();
 
     if (!snap.exists) {
@@ -212,17 +213,17 @@ export const getLastOpenedNotificationTime = async (req, res) => {
 
 export const updateLastOpenedNotificationTime = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { userId } = req.body;
 
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Phone is required",
+        message: "User ID is required",
       });
     }
 
-    const documentId = `91${phone}`;
-    const userRef = db.collection("users").doc(documentId);
+    // const documentId = `91${phone}`;
+    const userRef = db.collection("users").doc(userId);
 
     // ✅ UNIX timestamp (seconds)
     const unixTs = Math.floor(Date.now() / 1000);
@@ -251,17 +252,17 @@ export const updateLastOpenedNotificationTime = async (req, res) => {
 
 export const adminGetLastOpenedNotificationTime = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { userId } = req.body;
 
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Phone is required",
+        message: "User ID is required",
       });
     }
 
-    const documentId = `91${phone}`;
-    const userRef = db.collection("users").doc(documentId);
+    // const documentId = `91${phone}`;
+    const userRef = db.collection("users").doc(userId);
     const snap = await userRef.get();
 
     if (!snap.exists) {
@@ -290,17 +291,17 @@ export const adminGetLastOpenedNotificationTime = async (req, res) => {
 
 export const adminUpdateLastOpenedNotificationTime = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { userId } = req.body;
 
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Phone is required",
+        message: "User ID is required",
       });
     }
 
-    const documentId = `91${phone}`;
-    const userRef = db.collection("users").doc(documentId);
+    // const documentId = `91${phone}`;
+    const userRef = db.collection("users").doc(userId);
 
     // ✅ UNIX timestamp (seconds)
     const unixTs = Math.floor(Date.now() / 1000);
@@ -330,7 +331,7 @@ export const adminUpdateLastOpenedNotificationTime = async (req, res) => {
 export const getNotificationsByRole = async (req, res) => {
   try {
     const role = (req.params.role || "").toLowerCase();
-    const phone = req.query.phone;
+    const userId = req.query.userId;
 
     if (!role) {
       return res.status(400).json({
@@ -339,10 +340,10 @@ export const getNotificationsByRole = async (req, res) => {
       });
     }
 
-    if (!phone) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Phone is required",
+        message: "User ID is required",
       });
     }
 
@@ -442,12 +443,12 @@ export const getUserNotificationHistory = async (req, res) => {
       });
     }
 
-    const parts = user_id.split("_");
-    const phone = parts[1];
+    // const parts = user_id.split("_");
+    // const phone = parts[1];
 
     const userMessagesRef = db
       .collection("notification_history")
-      .doc(`91${phone}`)
+      .doc(user_id)
       .collection("messages");
 
     let queryRef = userMessagesRef
